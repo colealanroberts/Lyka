@@ -54,7 +54,36 @@ public struct LykaTabbar: View {
                     }
                     tab.onTap()
                 } label: {
-                    tabLabel(for: tab, isActive: isActive)
+                    VStack(alignment: .center, spacing: stylesheet.spacing.xs) {
+                        Group {
+                            if isActive, let activeIcon = tab.activeIcon {
+                                activeIcon
+                            } else {
+                                tab.icon
+                            }
+                        }
+                        .foregroundStyle(isActive ? .white : stylesheet.colors.borderDefault)
+
+                        if let title = tab.title {
+                            Text(title)
+                                .foregroundStyle(isActive ? .white : stylesheet.colors.borderDefault)
+                                .font(.system(size: stylesheet.typography.caption2))
+                                .fontWeight(isActive ? .semibold : .regular)
+                        }
+                    }
+                    .foregroundStyle(
+                        isActive ? stylesheet.colors.borderFocused : stylesheet.colors.borderDefault
+                    )
+                    .padding(.vertical, stylesheet.spacing.small)
+                    .frame(maxWidth: .infinity)
+                    .background {
+                        if isActive {
+                            RoundedRectangle(cornerRadius: stylesheet.radii.small)
+                                .fill(stylesheet.colors.surfaceDark)
+                                .matchedGeometryEffect(id: "activeTab", in: namespace)
+                        }
+                    }
+                    .scaleEffect(isActive ? 1.05 : 1.0)
                 }
                 .contentShape(Rectangle())
             }
@@ -75,56 +104,6 @@ public struct LykaTabbar: View {
             stylesheet.spacing.medium
         )
         .compositingGroup()
-    }
-
-    // MARK: - Helper Views
-
-    @ViewBuilder
-    private func tabLabel(for tab: Tab, isActive: Bool) -> some View {
-        VStack(alignment: .center, spacing: stylesheet.spacing.xs) {
-            tabIcon(for: tab, isActive: isActive)
-
-            if let title = tab.title {
-                tabTitle(title, isActive: isActive)
-            }
-        }
-        .foregroundStyle(
-            isActive ? stylesheet.colors.borderFocused : stylesheet.colors.borderDefault
-        )
-        .padding(.vertical, stylesheet.spacing.small)
-        .frame(maxWidth: .infinity)
-        .background {
-            if isActive {
-                activeTabBackground()
-            }
-        }
-        .scaleEffect(isActive ? 1.05 : 1.0)
-    }
-
-    @ViewBuilder
-    private func tabIcon(for tab: Tab, isActive: Bool) -> some View {
-        Group {
-            if isActive, let activeIcon = tab.activeIcon {
-                activeIcon
-            } else {
-                tab.icon
-            }
-        }
-        .foregroundStyle(isActive ? .white : stylesheet.colors.borderDefault)
-    }
-
-    @ViewBuilder
-    private func tabTitle(_ title: String, isActive: Bool) -> some View {
-        Text(title)
-            .foregroundStyle(isActive ? .white : stylesheet.colors.borderDefault)
-            .font(.system(size: stylesheet.typography.caption2))
-            .fontWeight(isActive ? .semibold : .regular)
-    }
-
-    private func activeTabBackground() -> some View {
-        RoundedRectangle(cornerRadius: stylesheet.radii.small)
-            .fill(stylesheet.colors.surfaceDark)
-            .matchedGeometryEffect(id: "activeTab", in: namespace)
     }
 }
 
