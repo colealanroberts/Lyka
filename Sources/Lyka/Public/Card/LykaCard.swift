@@ -86,24 +86,22 @@ public struct LykaCard<Footer: View>: View {
                         )
                 }
             case .images(let images):
-                GeometryReader { geometry in
-                    ScrollView(.horizontal) {
-                        HStack(spacing: .zero) {
-                            ForEach(images.indices, id: \.self) { index in
-                                images[index]
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: geometry.size.width, height: 200)
-                                    .clipped()
-                            }
+                ScrollView(.horizontal) {
+                    HStack(spacing: .zero) {
+                        ForEach(images.indices, id: \.self) { index in
+                            images[index]
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(height: 200)
+                                .clipped()
+                                .containerRelativeFrame(.horizontal)
                         }
-                        .scrollTargetLayout()
                     }
-                    .scrollPosition(id: $viewModel.currentImageIndex)
-                    .scrollIndicators(.hidden)
-                    .scrollTargetBehavior(.paging)
+                    .scrollTargetLayout()
                 }
-                .frame(height: 200)
+                .scrollPosition(id: $viewModel.currentImageIndex)
+                .scrollIndicators(.hidden)
+                .scrollTargetBehavior(.paging)
                 .clipShape(
                     UnevenRoundedRectangle(
                         topLeadingRadius: stylesheet.radii.medium,

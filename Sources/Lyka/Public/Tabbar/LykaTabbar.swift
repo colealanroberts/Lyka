@@ -123,7 +123,7 @@ public struct LykaTabbar: View {
 
     private func activeTabBackground() -> some View {
         RoundedRectangle(cornerRadius: stylesheet.radii.small)
-            .fill(stylesheet.colors.primary)
+            .fill(stylesheet.colors.surfaceDark)
             .matchedGeometryEffect(id: "activeTab", in: namespace)
     }
 }
