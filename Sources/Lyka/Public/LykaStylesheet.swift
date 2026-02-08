@@ -98,8 +98,11 @@ extension LykaStylesheet {
         /// `8.0`
         public let footnote: CGFloat
 
-        /// `12.0`
+        /// `10.0`
         public let caption: CGFloat
+
+        /// `12.0`
+        public let caption2: CGFloat
 
         /// `14.0`
         public let body: CGFloat
@@ -122,6 +125,7 @@ extension LykaStylesheet {
         init(
             footnote: CGFloat = 8.0,
             caption: CGFloat = 12.0,
+            caption2: CGFloat = 10.0,
             body: CGFloat = 14.0,
             head5: CGFloat = 16.0,
             head4: CGFloat = 18.0,
@@ -131,6 +135,7 @@ extension LykaStylesheet {
         ) {
             self.footnote = footnote
             self.caption = caption
+            self.caption2 = caption2
             self.body = body
             self.head5 = head5
             self.head4 = head4

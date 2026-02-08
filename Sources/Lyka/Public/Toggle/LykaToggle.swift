@@ -69,7 +69,7 @@ public struct LykaToggle: View {
             .rect
         )
         .onTapGesture {
-            withAnimation(.spring) {
+            withAnimation(.spring(duration: 0.25)) {
                 isOn.wrappedValue.toggle()
             }
         }

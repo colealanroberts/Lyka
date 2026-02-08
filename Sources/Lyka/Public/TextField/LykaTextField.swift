@@ -16,7 +16,7 @@ public struct LykaTextField<TrailingContent: View>: View {
     private let text: Binding<String>
 
     /// A placeholder to display, if any.
-    private let placeholder: String?
+    private let placeholder: String
 
     /// The variant to use for styling.
     private let variant: LykaTextFieldVariant
@@ -31,7 +31,7 @@ public struct LykaTextField<TrailingContent: View>: View {
 
     public init(
         text: Binding<String>,
-        placeholder: String?,
+        placeholder: String,
         variant: LykaTextFieldVariant = .primary,
         @ViewBuilder trailingContent: () -> TrailingContent = { EmptyView() },
         configure: (inout LykaTextFieldConfiguration) -> Void = { _ in }

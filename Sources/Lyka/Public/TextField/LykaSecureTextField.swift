@@ -21,11 +21,14 @@ public struct LykaSecureTextField: View {
     @State
     private var showPassword: Bool = false
 
+    @FocusState
+    private var field: Field?
+
     /// The binding text.
     private let text: Binding<String>
 
     /// A placeholder to display, if any.
-    private let placeholder: String?
+    private let placeholder: String
 
     /// The variant to use for styling.
     private let variant: LykaTextFieldVariant
@@ -37,7 +40,7 @@ public struct LykaSecureTextField: View {
 
     public init(
         text: Binding<String>,
-        placeholder: String?,
+        placeholder: String,
         variant: LykaTextFieldVariant = .primary,
         configure: (inout LykaTextFieldConfiguration) -> Void = { _ in }
     ) {
@@ -61,14 +64,22 @@ public struct LykaSecureTextField: View {
             }
         ) {
             ZStack(alignment: .trailing) {
-                if showPassword {
-                    TextField("", text: text)
-                } else {
-                    SecureField("", text: text)
-                }
+                TextField("", text: text)
+                    .opacity(showPassword ? 1.0 : 0.0)
+                    .focused($field, equals: .plain)
+
+                SecureField("", text: text)
+                    .opacity(!showPassword ? 1.0 : 0.0)
+                    .focused($field, equals: .secure)
 
                 Button {
                     showPassword.toggle()
+
+                    if showPassword {
+                        field = .plain
+                    } else {
+                        field = .secure
+                    }
                 } label: {
                     Image(
                         systemName: showPassword ? "eye" : "eye.slash" 
@@ -81,5 +92,17 @@ public struct LykaSecureTextField: View {
                 .buttonStyle(.plain)
             }
         }
+    }
+}
+
+// MARK: - LykaSecureTextField+Field
+
+private extension LykaSecureTextField {
+    enum Field {
+        /// The plain text field.
+        case plain
+
+        /// The secure text field.
+        case secure
     }
 }

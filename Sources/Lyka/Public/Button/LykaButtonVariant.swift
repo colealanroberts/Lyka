@@ -14,8 +14,16 @@ public enum LykaButtonVariant {
     /// The primary variant.
     case primary
 
+    /// A link button style.
+    case link
+
     /// Constructs a concrete `LykaButtonCore.Style` from the abstract type (`Self`).
     func materialized<Content: View>(stylesheet: LykaStylesheet) -> LykaButtonCore<Content>.Style {
-        .primary(stylesheet: stylesheet)
+        switch self {
+        case .primary:
+            .primary(stylesheet: stylesheet)
+        case .link:
+            .link(stylesheet: stylesheet)
+        }
     }
 }

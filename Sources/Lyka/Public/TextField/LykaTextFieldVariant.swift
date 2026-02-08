@@ -14,8 +14,8 @@ public enum LykaTextFieldVariant {
     /// The primary variant.
     case primary
 
-    /// Constructs a concrete `BlueprintTextField.Style` from the abstract tyle (`Self`).
-    func materialized<Content: View>(stylesheet: LykaStylesheet) -> LykaTextFieldCore<Content>.Style {
+    /// Constructs a concrete `LykaTextFieldStyle` from the abstract type (`Self`).
+    func materialized(stylesheet: LykaStylesheet) -> LykaTextFieldStyle {
         .primary(stylesheet: stylesheet)
     }
 }

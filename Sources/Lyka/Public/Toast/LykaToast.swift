@@ -9,7 +9,30 @@ import Combine
 import Foundation
 import SwiftUI
 
-// MARK: - Toast
+// MARK: - LykaToast
+
+public struct LykaToast: Identifiable {
+    /// The id  of the toast.
+    public let id = UUID()
+
+    /// The title of the toast.
+    public let title: String
+
+    /// The close action, if any.
+    public internal(set) var closeAction: ((ID) -> Void)?
+
+    // MARK: - Init
+
+    public init(
+        title: String,
+        closeAction: ((ID) -> Void)? = nil
+    ) {
+        self.title = title
+        self.closeAction = closeAction
+    }
+}
+
+// MARK: - ObservableStorage
 
 protocol ObservableStorage {
     /// The type of element to store.
@@ -28,20 +51,7 @@ protocol ObservableStorage {
     func remove(_ id: Element.ID)
 }
 
-// MARK: - Toast
-
-public struct LykaToast: Identifiable {
-    /// The id  of the toast.
-    public let id = UUID()
-
-    /// The title of the toast.
-    public let title: String
-
-    /// The close action, if any.
-    public internal(set) var closeAction: ((ID) -> Void)?
-}
-
-// MARK: - ToastPresenter
+// MARK: - LykaToastPresenter
 
 /// A class that manges lifetime and presentation of a `Toast`.
 
@@ -63,7 +73,7 @@ public final class LykaToastPresenter: ObservableStorage {
 
     // MARK: - Init
 
-    init(
+    public init(
         configure: (inout Configuration) -> Void = { _ in }
     ) {
         var copy = Configuration()
@@ -141,21 +151,33 @@ public final class LykaToastPresenter: ObservableStorage {
 // MARK: - LykaToastPresenter+Configuration
 
 extension LykaToastPresenter {
-    struct Configuration {
+    public struct Configuration {
         /// The maximum number of snacks to display at a given time.
         /// - Note: Defaults to `1`
         public var limit: Int
 
         /// The default animation for snacks.
-        /// - Note: The default transition is `.opacity`.
+        /// - Note: The default transition is `.opacity` combined with `.move`.
         public var transition: AnyTransition
 
         public init(
             limit: Int = 1,
-            transition: AnyTransition = .opacity
+            transition: AnyTransition = .opacity.combined(with: .move(edge: .bottom))
         ) {
             self.limit = limit
             self.transition = transition
         }
+    }
+}
+
+// MARK: - LykaToastPresenter+Util
+
+extension LykaToastPresenter {
+    /// A utility operator that allows a caller to write
+    /// ```
+    /// toastPresenter += Toast(...)
+    /// ```
+    public static func +=(presenter: LykaToastPresenter, toast: LykaToast) {
+        presenter.add(toast)
     }
 }
