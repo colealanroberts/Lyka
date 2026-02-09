@@ -141,7 +141,7 @@ public struct LykaTabbar<
                     .padding(stylesheet.spacing.small)
                     .background(
                         RoundedRectangle(cornerRadius: stylesheet.radii.medium)
-                            .fill(.white)
+                            .fill(stylesheet.colors.tabBarBackground)
                             .shadow(radius: 1)
                     )
                     .frame(maxWidth: .infinity)
@@ -177,11 +177,11 @@ public struct LykaTabbar<
                         tab.icon
                     }
                 }
-                .foregroundStyle(isActive ? .white : stylesheet.colors.borderDefault)
+                .foregroundStyle(isActive ? stylesheet.colors.tabBarActiveForeground : stylesheet.colors.tabBarInactiveForeground)
 
                 if let title = tab.title {
                     Text(title)
-                        .foregroundStyle(isActive ? .white : stylesheet.colors.borderDefault)
+                        .foregroundStyle(isActive ? stylesheet.colors.tabBarActiveForeground : stylesheet.colors.tabBarInactiveForeground)
                         .font(.system(size: stylesheet.typography.caption2))
                         .fontWeight(isActive ? .semibold : .regular)
                 }
@@ -260,7 +260,7 @@ extension LykaTabbar {
         ) {
             var activeIcon: Image? {
                 if let activeIconSymbolName {
-                    Image(systemName: activeIconSymbolName)
+                    return Image(systemName: activeIconSymbolName)
                 }
 
                 return nil

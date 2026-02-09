@@ -63,6 +63,17 @@ extension LykaStylesheet {
         public let surfaceSystem: Color
         public let surfaceDark: Color
 
+        public let tabBarBackground: Color
+        public let tabBarActiveForeground: Color
+        public let tabBarInactiveForeground: Color
+
+        public let cardBackground: Color
+        public let toggleKnob: Color
+
+        public let buttonPrimaryForeground: Color
+        public let buttonPrimaryBackground: Color
+        public let buttonLinkForeground: Color
+
         public let success: Color
         public let warning: Color
         public let fail: Color
@@ -74,6 +85,56 @@ extension LykaStylesheet {
             borderFocused: Color = .black,
             surfaceSystem: Color = Color(UIColor.systemBackground),
             surfaceDark: Color = .black,
+            tabBarBackground: Color = Color(
+                UIColor { traitCollection in
+                    traitCollection.userInterfaceStyle == .dark
+                        ? UIColor(white: 0.15, alpha: 1.0)
+                        : UIColor.white
+                }
+            ),
+            tabBarActiveForeground: Color = Color(
+                UIColor { traitCollection in
+                    traitCollection.userInterfaceStyle == .dark
+                        ? UIColor.white
+                        : UIColor.white
+                }
+            ),
+            tabBarInactiveForeground: Color = Color(UIColor.systemGray),
+            cardBackground: Color = Color(
+                UIColor { traitCollection in
+                    traitCollection.userInterfaceStyle == .dark
+                        ? UIColor(white: 0.15, alpha: 1.0)
+                        : UIColor.white
+                }
+            ),
+            toggleKnob: Color = Color(
+                UIColor { traitCollection in
+                    traitCollection.userInterfaceStyle == .dark
+                        ? UIColor.white
+                        : UIColor.white
+                }
+            ),
+            buttonPrimaryForeground: Color = Color(
+                UIColor { traitCollection in
+                    traitCollection.userInterfaceStyle == .dark
+                        ? UIColor.black
+                        : UIColor.white
+                }
+            ),
+            buttonPrimaryBackground: Color = Color(
+                UIColor { traitCollection in
+                    traitCollection.userInterfaceStyle == .dark
+                        ? UIColor.white
+                        : UIColor.black
+                }
+            ),
+            buttonLinkForeground: Color = Color(
+                UIColor { traitCollection in
+                    traitCollection.userInterfaceStyle == .dark
+                        ? UIColor.white
+                        : UIColor.black
+                }
+            ),
             success: Color = .green,
             fail: Color = .red,
             warning: Color = .yellow
@@ -84,6 +145,14 @@ extension LykaStylesheet {
             self.borderFocused = borderFocused
             self.surfaceSystem = surfaceSystem
             self.surfaceDark = surfaceDark
+            self.tabBarBackground = tabBarBackground
+            self.tabBarActiveForeground = tabBarActiveForeground
+            self.tabBarInactiveForeground = tabBarInactiveForeground
+            self.cardBackground = cardBackground
+            self.toggleKnob = toggleKnob
+            self.buttonPrimaryForeground = buttonPrimaryForeground
+            self.buttonPrimaryBackground = buttonPrimaryBackground
+            self.buttonLinkForeground = buttonLinkForeground
             self.success = success
             self.fail = fail
             self.warning = warning

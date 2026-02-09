@@ -138,9 +138,9 @@ extension LykaButtonCore {
             stylesheet: LykaStylesheet
         ) -> Self {
             .init(
-                foregroundColor: .white,
-                backgroundColor: stylesheet.colors.surfaceDark,
-                borderColor: stylesheet.colors.surfaceDark,
+                foregroundColor: stylesheet.colors.buttonPrimaryForeground,
+                backgroundColor: stylesheet.colors.buttonPrimaryBackground,
+                borderColor: stylesheet.colors.buttonPrimaryBackground,
                 borderWidth: stylesheet.borders.thin,
                 cornerRadius: stylesheet.radii.medium
             )
@@ -150,7 +150,7 @@ extension LykaButtonCore {
             stylesheet: LykaStylesheet
         ) -> Self {
             .init(
-                foregroundColor: stylesheet.colors.surfaceDark,
+                foregroundColor: stylesheet.colors.buttonLinkForeground,
                 backgroundColor: .clear,
                 borderColor: .clear,
                 borderWidth: stylesheet.borders.thin,

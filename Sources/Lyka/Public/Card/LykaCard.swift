@@ -193,7 +193,7 @@ public struct LykaCard<Footer: View>: View {
         RoundedRectangle(
             cornerRadius: stylesheet.radii.medium
         )
-        .fill(.white)
+        .fill(stylesheet.colors.cardBackground)
         .shadow(
             color: stylesheet.colors.borderDefault.opacity(0.5),
             radius: 2.0

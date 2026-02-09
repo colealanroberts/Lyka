@@ -35,7 +35,7 @@ public struct LykaToggle: View {
             }
 
             RoundedRectangle(cornerRadius: stylesheet.radii.small)
-                .fill(.white)
+                .fill(stylesheet.colors.toggleKnob)
                 .frame(width: 26, height: 26)
                 .padding(4)
                 .overlay {
