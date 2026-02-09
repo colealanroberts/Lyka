@@ -14,7 +14,8 @@ public struct LykaTabbar<
         TabB: View,
         TabC: View,
         TabD: View,
-        TabE: View
+        TabE: View,
+        TrailingItem: View
 >: View {
 
     // MARK: - Environment
@@ -27,6 +28,7 @@ public struct LykaTabbar<
     private let tabC: Tab<TabC>?
     private let tabD: Tab<TabD>?
     private let tabE: Tab<TabE>?
+    private let trailingItem: TrailingItem
 
     /// The currently active tab.
     @State
@@ -60,13 +62,16 @@ public struct LykaTabbar<
         second tabB: Tab<TabB>? = nil,
         third tabC: Tab<TabC>? = nil,
         fourth tabD: Tab<TabD>? = nil,
-        fifth tabE: Tab<TabE>? = nil
+        fifth tabE: Tab<TabE>? = nil,
+        @ViewBuilder trailingItem: () -> TrailingItem = { EmptyView() }
     ) {
         self.tabA = tabA
         self.tabB = tabB
         self.tabC = tabC
         self.tabD = tabD
         self.tabE = tabE
+        self.trailingItem = trailingItem()
+
         self._activeTabID = State(initialValue: tabA.id)
     }
 
@@ -101,51 +106,49 @@ public struct LykaTabbar<
 
             VStack {
                 Spacer()
+
                 HStack(spacing: 0) {
-                    tabButton(for: tabA)
+                    HStack(spacing: 0) {
+                        tabButton(for: tabA)
 
-                    if let tabB {
-                        tabButton(for: tabB)
-                    }
+                        if let tabB {
+                            tabButton(for: tabB)
+                        }
 
-                    if let tabC {
-                        tabButton(for: tabC)
-                    }
+                        if let tabC {
+                            tabButton(for: tabC)
+                        }
 
-                    if let tabD {
-                        tabButton(for: tabD)
-                    }
+                        if let tabD {
+                            tabButton(for: tabD)
+                        }
 
-                    if let tabE {
-                        tabButton(for: tabE)
+                        if let tabE {
+                            tabButton(for: tabE)
+                        }
                     }
+                    .background(alignment: .leading) {
+                        GeometryReader { proxy in
+                            let tabWidth = proxy.size.width / CGFloat(tabCount).rounded()
+
+                            RoundedRectangle(cornerRadius: stylesheet.radii.small)
+                                .fill(stylesheet.colors.surfaceDark)
+                                .offset(x: tabWidth * CGFloat(activeTabIndex))
+                                .animation(.spring(duration: 0.25), value: activeTabIndex)
+                                .frame(width: tabWidth)
+                        }
+                    }
+                    .padding(stylesheet.spacing.small)
+                    .background(
+                        RoundedRectangle(cornerRadius: stylesheet.radii.medium)
+                            .fill(.white)
+                            .shadow(radius: 1)
+                    )
+                    .frame(maxWidth: .infinity)
+
+                    trailingItem
                 }
-                .background(alignment: .leading) {
-                    GeometryReader { proxy in
-                        let tabWidth = proxy.size.width / CGFloat(tabCount).rounded()
-
-                        RoundedRectangle(cornerRadius: stylesheet.radii.small)
-                            .fill(stylesheet.colors.surfaceDark)
-                            .offset(x: tabWidth * CGFloat(activeTabIndex))
-                            .animation(.spring(duration: 0.25), value: activeTabIndex)
-                            .frame(width: tabWidth)
-                    }
-                }
-                .padding(
-                    stylesheet.spacing.small
-                )
-                .frame(
-                    maxWidth: .infinity
-                )
-                .background(
-                    RoundedRectangle(cornerRadius: stylesheet.radii.medium)
-                        .fill(.white)
-                        .shadow(radius: 1)
-                )
-                .padding(
-                    .horizontal,
-                    stylesheet.spacing.medium
-                )
+                .padding(.horizontal, stylesheet.spacing.medium)
                 .padding(.bottom, 8)
                 .compositingGroup()
             }
@@ -295,10 +298,13 @@ extension LykaTabbar {
 // us to pass `nil` values where tabX is `EmptyView`, which makes composing
 // a tabbar much simpler. Without this the callsite would need explicitly
 // capture `{ EmptyView() }` which sucks.
+
 extension LykaTabbar where TabB == EmptyView,
                             TabC == EmptyView,
                             TabD == EmptyView,
-                            TabE == EmptyView {
+                            TabE == EmptyView,
+                            TrailingItem == EmptyView
+{
     public init(
         first tabA: Tab<TabA>
     ) {
@@ -307,14 +313,37 @@ extension LykaTabbar where TabB == EmptyView,
             second: nil,
             third: nil,
             fourth: nil,
-            fifth: nil
+            fifth: nil,
+            trailingItem: { EmptyView() }
+        )
+    }
+}
+
+extension LykaTabbar where TabB == EmptyView,
+                            TabC == EmptyView,
+                            TabD == EmptyView,
+                            TabE == EmptyView
+{
+    public init(
+        first tabA: Tab<TabA>,
+        @ViewBuilder trailingItem: () -> TrailingItem
+    ) {
+        self.init(
+            first: tabA,
+            second: nil,
+            third: nil,
+            fourth: nil,
+            fifth: nil,
+            trailingItem: trailingItem
         )
     }
 }
 
 extension LykaTabbar where TabC == EmptyView,
                             TabD == EmptyView,
-                            TabE == EmptyView {
+                            TabE == EmptyView,
+                            TrailingItem == EmptyView
+{
     public init(
         first tabA: Tab<TabA>,
         second tabB: Tab<TabB>
@@ -324,13 +353,36 @@ extension LykaTabbar where TabC == EmptyView,
             second: tabB,
             third: nil,
             fourth: nil,
-            fifth: nil
+            fifth: nil,
+            trailingItem: { EmptyView() }
+        )
+    }
+}
+
+extension LykaTabbar where TabC == EmptyView,
+                            TabD == EmptyView,
+                            TabE == EmptyView
+{
+    public init(
+        first tabA: Tab<TabA>,
+        second tabB: Tab<TabB>,
+        @ViewBuilder trailingItem: () -> TrailingItem
+    ) {
+        self.init(
+            first: tabA,
+            second: tabB,
+            third: nil,
+            fourth: nil,
+            fifth: nil,
+            trailingItem: trailingItem
         )
     }
 }
 
 extension LykaTabbar where TabD == EmptyView,
-                           TabE == EmptyView {
+                           TabE == EmptyView,
+                           TrailingItem == EmptyView
+{
     public init(
         first tabA: Tab<TabA>,
         second tabB: Tab<TabB>,
@@ -341,12 +393,35 @@ extension LykaTabbar where TabD == EmptyView,
             second: tabB,
             third: tabC,
             fourth: nil,
-            fifth: nil
+            fifth: nil,
+            trailingItem: { EmptyView() }
         )
     }
 }
 
-extension LykaTabbar where TabE == EmptyView {
+extension LykaTabbar where TabD == EmptyView,
+                           TabE == EmptyView
+{
+    public init(
+        first tabA: Tab<TabA>,
+        second tabB: Tab<TabB>,
+        third tabC: Tab<TabC>,
+        @ViewBuilder trailingItem: () -> TrailingItem
+    ) {
+        self.init(
+            first: tabA,
+            second: tabB,
+            third: tabC,
+            fourth: nil,
+            fifth: nil,
+            trailingItem: trailingItem
+        )
+    }
+}
+
+extension LykaTabbar where TabE == EmptyView,
+                           TrailingItem == EmptyView
+{
     public init(
         first tabA: Tab<TabA>,
         second tabB: Tab<TabB>,
@@ -358,7 +433,48 @@ extension LykaTabbar where TabE == EmptyView {
             second: tabB,
             third: tabC,
             fourth: tabD,
-            fifth: nil
+            fifth: nil,
+            trailingItem: { EmptyView() }
+        )
+    }
+}
+
+extension LykaTabbar where TabE == EmptyView
+{
+    public init(
+        first tabA: Tab<TabA>,
+        second tabB: Tab<TabB>,
+        third tabC: Tab<TabC>,
+        fourth tabD: Tab<TabD>,
+        @ViewBuilder trailingItem: () -> TrailingItem
+    ) {
+        self.init(
+            first: tabA,
+            second: tabB,
+            third: tabC,
+            fourth: tabD,
+            fifth: nil,
+            trailingItem: trailingItem
+        )
+    }
+}
+
+extension LykaTabbar where TrailingItem == EmptyView
+{
+    public init(
+        first tabA: Tab<TabA>,
+        second tabB: Tab<TabB>,
+        third tabC: Tab<TabC>,
+        fourth tabD: Tab<TabD>,
+        fifth tabE: Tab<TabE>
+    ) {
+        self.init(
+            first: tabA,
+            second: tabB,
+            third: tabC,
+            fourth: tabD,
+            fifth: tabE,
+            trailingItem: { EmptyView() }
         )
     }
 }
