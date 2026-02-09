@@ -22,10 +22,6 @@ public struct LykaTabbar<
     @Environment(\.stylesheet)
     private var stylesheet
 
-    /// Namespace for matched geometry effect.
-    @Namespace
-    private var namespace
-
     private let tabA: Tab<TabA>
     private let tabB: Tab<TabB>?
     private let tabC: Tab<TabC>?
@@ -35,6 +31,26 @@ public struct LykaTabbar<
     /// The currently active tab.
     @State
     private var activeTabID: UUID
+
+    /// Helper computed property to get active tab index
+    private var activeTabIndex: Int {
+        if activeTabID == tabA.id { return 0 }
+        if let tabB, activeTabID == tabB.id { return 1 }
+        if let tabC, activeTabID == tabC.id { return 2 }
+        if let tabD, activeTabID == tabD.id { return 3 }
+        if let tabE, activeTabID == tabE.id { return 4 }
+        return 0
+    }
+
+    /// Helper computed property to get total number of tabs
+    private var tabCount: Int {
+        var count = 1 // tabA always exists
+        if tabB != nil { count += 1 }
+        if tabC != nil { count += 1 }
+        if tabD != nil { count += 1 }
+        if tabE != nil { count += 1 }
+        return count
+    }
 
     // MARK: - Init
 
@@ -82,7 +98,6 @@ public struct LykaTabbar<
                         .tag(tabE.id)
                 }
             }
-            .tabViewStyle(.automatic)
 
             VStack {
                 Spacer()
@@ -105,6 +120,17 @@ public struct LykaTabbar<
                         tabButton(for: tabE)
                     }
                 }
+                .background(alignment: .leading) {
+                    GeometryReader { proxy in
+                        let tabWidth = proxy.size.width / CGFloat(tabCount).rounded()
+
+                        RoundedRectangle(cornerRadius: stylesheet.radii.small)
+                            .fill(stylesheet.colors.surfaceDark)
+                            .offset(x: tabWidth * CGFloat(activeTabIndex))
+                            .animation(.spring(duration: 0.25), value: activeTabIndex)
+                            .frame(width: tabWidth)
+                    }
+                }
                 .padding(
                     stylesheet.spacing.small
                 )
@@ -124,7 +150,6 @@ public struct LykaTabbar<
                 .compositingGroup()
             }
         }
-        .ignoresSafeArea(.keyboard)
     }
 
     // MARK: - Helpers
@@ -161,16 +186,16 @@ public struct LykaTabbar<
             .foregroundStyle(
                 isActive ? stylesheet.colors.borderFocused : stylesheet.colors.borderDefault
             )
-            .padding(.vertical, stylesheet.spacing.small)
-            .frame(maxWidth: .infinity)
-            .background {
-                if isActive {
-                    RoundedRectangle(cornerRadius: stylesheet.radii.small)
-                        .fill(stylesheet.colors.surfaceDark)
-                        .matchedGeometryEffect(id: "activeTab", in: namespace)
-                }
-            }
-            .scaleEffect(isActive ? 1.05 : 1.0)
+            .padding(
+                .vertical,
+                stylesheet.spacing.small
+            )
+            .frame(
+                maxWidth: .infinity
+            )
+            .scaleEffect(
+                isActive ? 1.05 : 1.0
+            )
         }
         .contentShape(Rectangle())
     }
