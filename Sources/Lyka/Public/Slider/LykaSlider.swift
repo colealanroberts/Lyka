@@ -27,10 +27,12 @@ public struct LykaSlider: View {
         range: ClosedRange<Double> = 0.0...1.0,
         step: Double = 0.01
     ) {
-        self.viewModel = .init(
-            progress: value,
-            range: range,
-            step: step
+        self._viewModel = .init(
+            wrappedValue: .init(
+                progress: value,
+                range: range,
+                step: step
+            )
         )
     }
 
@@ -145,19 +147,6 @@ private extension LykaSlider {
 
         // MARK: - Methods
 
-        func updateLayout(width: CGFloat, thumbSize: CGFloat) {
-            maxOffset = width - thumbSize
-            syncXOffset()
-        }
-
-        func syncXOffset() {
-            guard maxOffset > 0 else { return }
-            let delta = range.upperBound - range.lowerBound
-            guard delta > 0 else { return }
-            let percentage = (progress.wrappedValue - range.lowerBound) / delta
-            xOffset = CGFloat(percentage) * maxOffset
-        }
-
         func onDrag(
             x: CGFloat,
             stylesheet: LykaStylesheet
@@ -177,7 +166,7 @@ private extension LykaSlider {
             }
 
             progress.wrappedValue = value
-            syncXOffset()
+            xOffset = dragOffset
         }
 
         func onEnded() {
