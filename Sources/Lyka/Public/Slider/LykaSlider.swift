@@ -43,7 +43,7 @@ public struct LykaSlider: View {
             ZStack(alignment: .leading) {
                 LykaProgressBar(
                     progress: .init(
-                        get: { viewModel.normalizedProgress },
+                        get: { viewModel.displayProgress },
                         set: { _ in }
                     ),
                     variant: .determinate,
@@ -53,15 +53,14 @@ public struct LykaSlider: View {
                     viewModel.maxOffset = proxy.size.width - stylesheet.spacing.xxl
                 }
 
-                track()
+                track
             }
-            .sensoryFeedback(.increase, trigger: viewModel.progress.wrappedValue)
+            .sensoryFeedback(.selection, trigger: viewModel.hapticTrigger)
         }
-        .frame(height: 24)
     }
 
     @ViewBuilder
-    private func track() -> some View {
+    private var track: some View {
         let gesture = DragGesture().onChanged {
             viewModel.onDrag(
                 x: $0.location.x,
@@ -80,6 +79,9 @@ public struct LykaSlider: View {
         )
         .shadow(
             radius: 1
+        )
+        .scaleEffect(
+            viewModel.state == .dragging ? 1.2 : 1.0
         )
         .offset(
             x: viewModel.xOffset
@@ -102,30 +104,55 @@ private extension LykaSlider {
 
         // MARK: - Properties
 
-        /// The binding to the external value
-        var progress: Binding<Double>
+        /// The progress displayed to the user.
+        /// - Note: Note, this value is normalized using min-max normalization.
+        var displayProgress: Double {
+            normalize(
+                value,
+                min: range.lowerBound,
+                max: range.upperBound
+            )
+        }
 
         /// The current drag x-position.
-        var xOffset: CGFloat = .zero
+        var xOffset: CGFloat {
+            guard maxOffset > .zero else {
+                return .zero
+            }
+
+            return displayProgress * maxOffset
+        }
 
         /// The max offset (width - thumb size).
+        /// - Note: This is set `onAppear { ... }` using the width of the container.
         var maxOffset: CGFloat = .zero
 
         /// The current state.
         var state: DragState = .idle
 
-        /// Normalized progress (0.0 to 1.0) for the progress bar.
-        var normalizedProgress: Double {
-            maxOffset > .zero ? xOffset / maxOffset : .zero
-        }
+        /// Triggers haptics when step boundary is exceeded.
+        var hapticTrigger = false
 
         // MARK: - Private Properties
 
+        /// The current value
+        private var value: Double {
+            didSet {
+                progress.wrappedValue = value
+            }
+        }
+
         /// The range of values.
-        let range: ClosedRange<Double>
+        private let range: ClosedRange<Double>
 
         /// The step increment.
-        let step: Double?
+        private let step: Double?
+
+        /// The binding to the external value
+        private let progress: Binding<Double>
+
+        /// The range delta.
+        private let delta: Double
 
         init(
             progress: Binding<Double>,
@@ -137,13 +164,9 @@ private extension LykaSlider {
 
             self.progress = progress
             self.range = range
-
-            if let step {
-                assert(step > .zero)
-                self.step = step
-            } else {
-                self.step = nil
-            }
+            self.value = progress.wrappedValue
+            self.step = step
+            self.delta = range.upperBound - range.lowerBound
         }
 
         // MARK: - Methods
@@ -152,27 +175,47 @@ private extension LykaSlider {
             x: CGFloat,
             width: CGFloat
         ) {
-            guard maxOffset > .zero else {
-                return
+            guard maxOffset > .zero else { return }
+
+            let drag = min(max(.zero, x - width), maxOffset)
+            let percent = drag / maxOffset
+            var next = range.lowerBound + (percent * delta)
+
+            // Snap to step if configured.
+            if let step {
+                let prev = value
+                next = (next / step).rounded() * step
+                next = next.clamped(to: range)
+
+                let prevStep = (prev / step).rounded()
+                let nextStep = (next / step).rounded()
+
+                if prevStep != nextStep {
+                    hapticTrigger.toggle()
+                }
             }
 
-            let dragOffset = min(max(.zero, x - width), maxOffset)
-            let percentage = dragOffset / maxOffset
-            let delta = range.upperBound - range.lowerBound
-            var value = range.lowerBound + (percentage * delta)
+            value = next
 
-            if let step, step > .zero {
-                value = (value / step).rounded() * step
-                value = min(max(value, range.lowerBound), range.upperBound)
+            withAnimation(.snappy(duration: 0.2)) {
+                state = .dragging
             }
-
-            state = .dragging
-            progress.wrappedValue = value
-            xOffset = dragOffset
         }
 
         func onEnded() {
-            state = .idle
+            withAnimation(.snappy(duration: 0.2)) {
+                state = .idle
+            }
+        }
+
+        // MARK: - Private Properties
+
+        private func normalize(
+            _ value: Double,
+            min: Double,
+            max: Double
+        ) -> Double {
+            (value - min) / (max - min)
         }
     }
 }
@@ -186,5 +229,13 @@ private extension LykaSlider {
 
         /// The slider is dragging
         case dragging
+    }
+}
+
+// MARK: - Double+Util
+
+private extension Double {
+    func clamped(to range: ClosedRange<Double>) -> Double {
+        min(max(self, range.lowerBound), range.upperBound)
     }
 }
