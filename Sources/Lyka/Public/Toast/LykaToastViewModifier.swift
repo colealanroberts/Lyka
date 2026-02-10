@@ -17,13 +17,16 @@ struct LykaToastViewModifier: ViewModifier {
     // MARK: - Private Properties
 
     private let presenter: LykaToastPresenter
+    private let bottomOffset: CGFloat
 
     // MARK: - Init
 
     init(
-        presenter: LykaToastPresenter
+        presenter: LykaToastPresenter,
+        bottomOffset: CGFloat = .zero
     ) {
         self.presenter = presenter
+        self.bottomOffset = bottomOffset
     }
 
     // MARK: - Body
@@ -51,6 +54,7 @@ struct LykaToastViewModifier: ViewModifier {
                     )
                 }
             }
+            .padding(.bottom, bottomOffset)
         }
     }
 }
@@ -60,12 +64,17 @@ struct LykaToastViewModifier: ViewModifier {
 extension View {
     /// A utility method that begins rendering toast content
     /// from an associated `LykaToastPresenter`.
-    public func presentingToasts(
-        using presenter: LykaToastPresenter
+    /// - Parameters:
+    ///   - presenter: The toast presenter to use
+    ///   - bottomOffset: Optional bottom padding to avoid overlapping with bottom UI elements (e.g., tab bars)
+    public func xpresentingToasts(
+        using presenter: LykaToastPresenter,
+        bottomOffset: CGFloat = .zero
     ) -> some View {
         modifier(
             LykaToastViewModifier(
-                presenter: presenter
+                presenter: presenter,
+                bottomOffset: bottomOffset
             )
         )
     }

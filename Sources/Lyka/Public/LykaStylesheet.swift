@@ -79,7 +79,7 @@ extension LykaStylesheet {
         public let fail: Color
 
         init(
-            primary: Color = .blue,
+            primary: Color = .indigo,
             secondary: Color = .red,
             borderDefault: Color = Color(UIColor.systemGray),
             borderFocused: Color = .black,

@@ -23,6 +23,11 @@ public struct LykaTabbar<
     @Environment(\.stylesheet)
     private var stylesheet
 
+    @Environment(\.rootToastPresenter)
+    private var rootToastPresenter
+
+    // MARK: - Private Properties
+
     private let tabA: Tab<TabA>
     private let tabB: Tab<TabB>?
     private let tabC: Tab<TabC>?
@@ -77,6 +82,9 @@ public struct LykaTabbar<
 
     // MARK: - UI
 
+    @State
+    private var tabBarHeight: CGFloat = 0
+
     public var body: some View {
         ZStack(alignment: .bottom) {
             TabView(selection: $activeTabID) {
@@ -103,56 +111,78 @@ public struct LykaTabbar<
                         .tag(tabE.id)
                 }
             }
+            .xpresentingToasts(
+                using: rootToastPresenter,
+                bottomOffset: tabBarHeight
+            )
 
             VStack {
                 Spacer()
 
-                HStack(spacing: 0) {
+                VStack(spacing: 0) {
                     HStack(spacing: 0) {
-                        tabButton(for: tabA)
+                        HStack(spacing: 0) {
+                            tabButton(for: tabA)
 
-                        if let tabB {
-                            tabButton(for: tabB)
-                        }
+                            if let tabB {
+                                tabButton(for: tabB)
+                            }
 
-                        if let tabC {
-                            tabButton(for: tabC)
-                        }
+                            if let tabC {
+                                tabButton(for: tabC)
+                            }
 
-                        if let tabD {
-                            tabButton(for: tabD)
-                        }
+                            if let tabD {
+                                tabButton(for: tabD)
+                            }
 
-                        if let tabE {
-                            tabButton(for: tabE)
+                            if let tabE {
+                                tabButton(for: tabE)
+                            }
                         }
+                        .background(alignment: .leading) {
+                            GeometryReader { proxy in
+                                let tabWidth = proxy.size.width / CGFloat(tabCount).rounded()
+
+                                RoundedRectangle(cornerRadius: stylesheet.radii.small)
+                                    .fill(stylesheet.colors.surfaceDark)
+                                    .offset(x: tabWidth * CGFloat(activeTabIndex))
+                                    .animation(.spring(duration: 0.25), value: activeTabIndex)
+                                    .frame(width: tabWidth)
+                            }
+                        }
+                        .padding(stylesheet.spacing.small)
+                        .background(
+                            RoundedRectangle(cornerRadius: stylesheet.radii.medium)
+                                .fill(stylesheet.colors.tabBarBackground)
+                                .shadow(radius: 1)
+                        )
+                        .frame(maxWidth: .infinity)
+
+                        trailingItem
                     }
-                    .background(alignment: .leading) {
-                        GeometryReader { proxy in
-                            let tabWidth = proxy.size.width / CGFloat(tabCount).rounded()
-
-                            RoundedRectangle(cornerRadius: stylesheet.radii.small)
-                                .fill(stylesheet.colors.surfaceDark)
-                                .offset(x: tabWidth * CGFloat(activeTabIndex))
-                                .animation(.spring(duration: 0.25), value: activeTabIndex)
-                                .frame(width: tabWidth)
-                        }
-                    }
-                    .padding(stylesheet.spacing.small)
-                    .background(
-                        RoundedRectangle(cornerRadius: stylesheet.radii.medium)
-                            .fill(stylesheet.colors.tabBarBackground)
-                            .shadow(radius: 1)
-                    )
-                    .frame(maxWidth: .infinity)
-
-                    trailingItem
+                    .padding(.horizontal, stylesheet.spacing.medium)
+                    .padding(.bottom, 8)
                 }
-                .padding(.horizontal, stylesheet.spacing.medium)
-                .padding(.bottom, 8)
                 .compositingGroup()
+                .background(
+                    GeometryReader { geometry in
+                        Color.clear
+                            .preference(
+                                key: TabBarHeightPreferenceKey.self,
+                                value: geometry.size.height
+                            )
+                            .onAppear {
+                                tabBarHeight = geometry.size.height
+                            }
+                    }
+                )
             }
         }
+        .onPreferenceChange(TabBarHeightPreferenceKey.self) { height in
+            tabBarHeight = height
+        }
+        .ignoresSafeArea(.keyboard)
     }
 
     // MARK: - Helpers
@@ -182,7 +212,7 @@ public struct LykaTabbar<
                 if let title = tab.title {
                     Text(title)
                         .foregroundStyle(isActive ? stylesheet.colors.tabBarActiveForeground : stylesheet.colors.tabBarInactiveForeground)
-                        .font(.system(size: stylesheet.typography.caption2))
+                        .font(.system(size: stylesheet.typography.footnote))
                         .fontWeight(isActive ? .semibold : .regular)
                 }
             }
@@ -479,4 +509,12 @@ extension LykaTabbar where TrailingItem == EmptyView
     }
 }
 
+// MARK: - TabBarHeightPreferenceKey
 
+private struct TabBarHeightPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}

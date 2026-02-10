@@ -16,6 +16,10 @@ public struct LykaProgressBar: View {
 
     // MARK: - Private Properties
 
+    /// Animation state for indeterminate progress
+    @State
+    private var isAnimating = false
+
     /// The progress binding.
     private let progress: Binding<Double>
 
@@ -23,17 +27,20 @@ public struct LykaProgressBar: View {
     /// - Note: See `LykaProgressBarVariant`.
     private let variant: LykaProgressBarVariant
 
-    /// Animation state for indeterminate progress
-    @State private var isAnimating = false
+    /// Whether updates are animated.
+    private let animated: Bool
 
-    // MARK: - Init
+    // MARK: - Public Init
 
+    /// The public API for binding progress updates.
     public init(
         progress: Binding<Double>? = nil,
-        variant: LykaProgressBarVariant
+        variant: LykaProgressBarVariant,
+        animated: Bool = true
     ) {
         self.progress = progress ?? .constant(0)
         self.variant = variant
+        self.animated = animated
     }
 
     // MARK: - UI
@@ -67,16 +74,13 @@ public struct LykaProgressBar: View {
             GeometryReader { proxy in
                 Rectangle()
                     .frame(
-                        width: proxy.size.width * (max(0, min(100, progress.wrappedValue)) / 100)
+                        width: proxy.size.width * (max(0, min(1.0, progress.wrappedValue)))
                     )
                     .frame(
                         maxWidth: .infinity,
                         alignment: .leading
                     )
-                    .animation(
-                        .snappy,
-                        value: progress.wrappedValue
-                    )
+                    .animation(animated ? .snappy : nil, value: progress.wrappedValue)
             }
         )
     }
@@ -101,7 +105,7 @@ public struct LykaProgressBar: View {
 
     private var bar: some View {
         Capsule()
-            .fill(Color.blue)
+            .fill(stylesheet.colors.primary)
             .frame(maxWidth: .infinity)
     }
 }

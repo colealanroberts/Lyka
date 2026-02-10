@@ -181,3 +181,20 @@ extension LykaToastPresenter {
         presenter.add(toast)
     }
 }
+
+// MARK: - LykaToastPresenter+Environment
+
+private struct LykaToastPresenterKey: EnvironmentKey {
+    static let defaultValue = LykaToastPresenter()
+}
+
+extension EnvironmentValues {
+    public var rootToastPresenter: LykaToastPresenter {
+        get {
+            self[LykaToastPresenterKey.self]
+        }
+        set {
+            self[LykaToastPresenterKey.self] = newValue
+        }
+    }
+}

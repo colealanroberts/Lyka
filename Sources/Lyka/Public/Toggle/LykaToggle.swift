@@ -63,7 +63,7 @@ public struct LykaToggle: View {
         )
         .background(
             RoundedRectangle(cornerRadius: stylesheet.radii.small)
-                .fill(isOn.wrappedValue ? stylesheet.colors.surfaceDark : stylesheet.colors.borderDefault)
+                .fill(isOn.wrappedValue ? stylesheet.colors.primary : stylesheet.colors.borderDefault)
         )
         .contentShape(
             .rect

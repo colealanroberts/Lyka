@@ -133,7 +133,7 @@ public struct LykaSelect: View {
                                     isSelected ? .semibold : .regular
                                 )
                                 .foregroundStyle(
-                                    isSelected ? Color.blue : .black
+                                    isSelected ? stylesheet.colors.primary : Color.primary
                                 )
                                 .frame(
                                     maxWidth: .infinity,
