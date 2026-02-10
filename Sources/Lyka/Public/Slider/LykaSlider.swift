@@ -17,18 +17,20 @@ public struct LykaSlider: View {
     // MARK: - Private Properties
 
     /// The backing view model.
-    @Bindable
+    @State
     private var viewModel: ViewModel
 
     // MARK: - Init
 
     public init(
         value: Binding<Double>,
-        in range: ClosedRange<Double>
+        range: ClosedRange<Double> = 0.0...1.0,
+        step: Double = 0.01
     ) {
         self.viewModel = .init(
             progress: value,
-            range: range
+            range: range,
+            step: step
         )
     }
 
@@ -58,32 +60,34 @@ public struct LykaSlider: View {
     @ViewBuilder
     private func track() -> some View {
         let gesture = DragGesture().onChanged {
-                viewModel.onDrag(
-                    x: $0.location.x,
-                    stylesheet: stylesheet
-                )
-            }
-            .onEnded { _ in
-                viewModel.onEnded()
-            }
+            viewModel.onDrag(
+                x: $0.location.x,
+                stylesheet: stylesheet
+            )
+        }
+        .onEnded { _ in
+            viewModel.onEnded()
+        }
 
-        RoundedRectangle(cornerRadius: stylesheet.radii.medium)
-            .fill(
-                .white
-            )
-            .shadow(
-                radius: 1
-            )
-            .offset(
-                x: viewModel.xOffset
-            )
-            .gesture(
-                gesture
-            )
-            .frame(
-                width: stylesheet.spacing.xxl,
-                height: stylesheet.spacing.xxl
-            )
+        RoundedRectangle(
+            cornerRadius: stylesheet.radii.medium
+        )
+        .fill(
+            .white
+        )
+        .shadow(
+            radius: 1
+        )
+        .offset(
+            x: viewModel.xOffset
+        )
+        .gesture(
+            gesture
+        )
+        .frame(
+            width: stylesheet.spacing.xxl,
+            height: stylesheet.spacing.xxl
+        )
     }
 }
 
@@ -117,15 +121,42 @@ private extension LykaSlider {
         /// The range of values.
         let range: ClosedRange<Double>
 
+        /// The step increment.
+        let step: Double?
+
         init(
             progress: Binding<Double>,
-            range: ClosedRange<Double>
+            range: ClosedRange<Double>,
+            step: Double?
         ) {
+            assert(range.lowerBound >= 0.0)
+            assert(range.upperBound > 0.0)
+
             self.progress = progress
             self.range = range
+
+            if let step {
+                assert(step > .zero)
+                self.step = step
+            } else {
+                self.step = nil
+            }
         }
 
         // MARK: - Methods
+
+        func updateLayout(width: CGFloat, thumbSize: CGFloat) {
+            maxOffset = width - thumbSize
+            syncXOffset()
+        }
+
+        func syncXOffset() {
+            guard maxOffset > 0 else { return }
+            let delta = range.upperBound - range.lowerBound
+            guard delta > 0 else { return }
+            let percentage = (progress.wrappedValue - range.lowerBound) / delta
+            xOffset = CGFloat(percentage) * maxOffset
+        }
 
         func onDrag(
             x: CGFloat,
@@ -134,12 +165,19 @@ private extension LykaSlider {
             guard maxOffset > .zero else { return }
 
             state = .dragging
-            xOffset = min(max(0, x - stylesheet.spacing.xxl / 2), maxOffset)
 
-            let percentage = xOffset / maxOffset
+            let dragOffset = min(max(.zero, x - stylesheet.spacing.xxl / 2), maxOffset)
+            let percentage = dragOffset / maxOffset
             let delta = range.upperBound - range.lowerBound
+            var value = range.lowerBound + (percentage * delta)
 
-            progress.wrappedValue = range.lowerBound + (percentage * delta)
+            if let step, step > .zero {
+                value = (value / step).rounded() * step
+                value = min(max(value, range.lowerBound), range.upperBound)
+            }
+
+            progress.wrappedValue = value
+            syncXOffset()
         }
 
         func onEnded() {

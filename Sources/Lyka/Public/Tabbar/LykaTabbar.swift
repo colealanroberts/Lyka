@@ -39,23 +39,25 @@ public struct LykaTabbar<
     @State
     private var activeTabID: UUID
 
-    /// Helper computed property to get active tab index
+    /// A utility property  that relays the active tab - at minimum `0`.
     private var activeTabIndex: Int {
         if activeTabID == tabA.id { return 0 }
         if let tabB, activeTabID == tabB.id { return 1 }
         if let tabC, activeTabID == tabC.id { return 2 }
         if let tabD, activeTabID == tabD.id { return 3 }
         if let tabE, activeTabID == tabE.id { return 4 }
+        
         return 0
     }
 
-    /// Helper computed property to get total number of tabs
+    /// A utility property that relays the number of tabs - at minimum one.
     private var tabCount: Int {
         var count = 1 // tabA always exists
         if tabB != nil { count += 1 }
         if tabC != nil { count += 1 }
         if tabD != nil { count += 1 }
         if tabE != nil { count += 1 }
+
         return count
     }
 
@@ -225,9 +227,6 @@ public struct LykaTabbar<
             )
             .frame(
                 maxWidth: .infinity
-            )
-            .scaleEffect(
-                isActive ? 1.05 : 1.0
             )
         }
         .contentShape(Rectangle())
