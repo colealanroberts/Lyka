@@ -55,6 +55,7 @@ public struct LykaSlider: View {
 
                 track()
             }
+            .sensoryFeedback(.increase, trigger: viewModel.progress.wrappedValue)
         }
         .frame(height: 24)
     }
@@ -64,7 +65,7 @@ public struct LykaSlider: View {
         let gesture = DragGesture().onChanged {
             viewModel.onDrag(
                 x: $0.location.x,
-                stylesheet: stylesheet
+                width: stylesheet.spacing.xxl / 2
             )
         }
         .onEnded { _ in
@@ -149,13 +150,13 @@ private extension LykaSlider {
 
         func onDrag(
             x: CGFloat,
-            stylesheet: LykaStylesheet
+            width: CGFloat
         ) {
-            guard maxOffset > .zero else { return }
+            guard maxOffset > .zero else {
+                return
+            }
 
-            state = .dragging
-
-            let dragOffset = min(max(.zero, x - stylesheet.spacing.xxl / 2), maxOffset)
+            let dragOffset = min(max(.zero, x - width), maxOffset)
             let percentage = dragOffset / maxOffset
             let delta = range.upperBound - range.lowerBound
             var value = range.lowerBound + (percentage * delta)
@@ -165,6 +166,7 @@ private extension LykaSlider {
                 value = min(max(value, range.lowerBound), range.upperBound)
             }
 
+            state = .dragging
             progress.wrappedValue = value
             xOffset = dragOffset
         }
